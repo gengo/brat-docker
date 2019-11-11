@@ -1,5 +1,5 @@
 # start from a base ubuntu image
-FROM ubuntu
+FROM ubuntu:bionic
 MAINTAINER Cass Johnston <cassjohnston@gmail.com>
 
 # set users cfg file
@@ -10,7 +10,9 @@ RUN apt-get update
 RUN apt-get install -y curl vim sudo wget rsync
 RUN apt-get install -y apache2
 RUN apt-get install -y python
+RUN apt-get install -y python-pip
 RUN apt-get install -y supervisor
+RUN apt-get install -y git
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -21,10 +23,10 @@ RUN cd /var/www/brat && tar -xvzf brat-v1.3_Crunchy_Frog.tar.gz
 
 # create a symlink so users can mount their data volume at /bratdata rather than the full path
 RUN mkdir /bratdata && mkdir /bratcfg
-RUN chown -R www-data:www-data /bratdata /bratcfg 
+RUN chown -R www-data:www-data /bratdata /bratcfg
 RUN chmod o-rwx /bratdata /bratcfg
 RUN ln -s /bratdata /var/www/brat/brat-v1.3_Crunchy_Frog/data
-RUN ln -s /bratcfg /var/www/brat/brat-v1.3_Crunchy_Frog/cfg 
+RUN ln -s /bratcfg /var/www/brat/brat-v1.3_Crunchy_Frog/cfg
 
 # And make that location a volume
 VOLUME /bratdata
@@ -38,6 +40,9 @@ RUN chown -R www-data:www-data /var/www/brat/brat-v1.3_Crunchy_Frog/
 
 ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
 
+# Install simstring for normalization feature
+RUN pip install git+git://github.com/vitalco/simstring-python-package#egg=simstring
+
 # add the user patching script
 ADD user_patch.py /var/www/brat/brat-v1.3_Crunchy_Frog/user_patch.py
 
@@ -50,7 +55,7 @@ EXPOSE 80
 # Instead, use supervisor to monitor the apache process
 RUN mkdir -p /var/log/supervisor
 
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf 
+ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord"]
 
