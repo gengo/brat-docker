@@ -22,15 +22,17 @@ RUN curl http://weaver.nlplab.org/~brat/releases/brat-v1.3_Crunchy_Frog.tar.gz >
 RUN cd /var/www/brat && tar -xvzf brat-v1.3_Crunchy_Frog.tar.gz
 
 # create a symlink so users can mount their data volume at /bratdata rather than the full path
-RUN mkdir /bratdata && mkdir /bratcfg
-RUN chown -R www-data:www-data /bratdata /bratcfg
+RUN mkdir /bratdata && mkdir /bratcfg && mkdir /work
+RUN chown -R www-data:www-data /bratdata /bratcfg /work
 RUN chmod o-rwx /bratdata /bratcfg
 RUN ln -s /bratdata /var/www/brat/brat-v1.3_Crunchy_Frog/data
 RUN ln -s /bratcfg /var/www/brat/brat-v1.3_Crunchy_Frog/cfg
+RUN ln -s /work /var/www/brat/brat-v1.3_Crunchy_Frog/work
 
 # And make that location a volume
 VOLUME /bratdata
 VOLUME /bratcfg
+VOLUME /work
 
 ADD brat_install_wrapper.sh /usr/bin/brat_install_wrapper.sh
 RUN chmod +x /usr/bin/brat_install_wrapper.sh
